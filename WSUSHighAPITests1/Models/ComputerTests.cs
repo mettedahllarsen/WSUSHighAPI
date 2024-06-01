@@ -1,12 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using WSUSHighAPI.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WSUSHighAPI.Models.Tests
+﻿namespace WSUSHighAPI.Models.Tests
 {
 	[TestClass]
 	public class ComputerTests
@@ -111,57 +103,6 @@ namespace WSUSHighAPI.Models.Tests
 
 			// Assert
 			Assert.IsFalse(isValid);
-		}
-
-		[TestMethod]
-		// Test if ValidateOSVersion returns true for a valid OS version.
-		public void ValidateOSVersion_ValidOSVersion_ReturnsTrue()
-		{
-			// Arrange
-			var computer = new Computer
-			{
-				OSVersion = "Windows 10"
-			};
-
-			// Act
-			bool isValid = computer.ValidateOSVersion();
-
-			// Assert
-			Assert.IsTrue(isValid);
-		}
-
-		[TestMethod]
-		// Test if ValidateOSVersion returns false for a null value for the OS version.
-		public void ValidateOSVersion_NullOSVersion_ReturnsFalse()
-		{
-			// Arrange
-			var computer = new Computer
-			{
-				OSVersion = null
-			};
-
-			// Act
-			bool isValid = computer.ValidateOSVersion();
-
-			// Assert
-			Assert.IsFalse(isValid);
-		}
-
-		[TestMethod]
-		// Test if ValidateOSVersion returns true for an OS version within the maximum length.
-		public void ValidateOSVersion_MaxLengthOSVersion_ReturnsTrue()
-		{
-			// Arrange
-			var computer = new Computer
-			{
-				OSVersion = new string('A', 100) // Create a string with 100 characters
-			};
-
-			// Act
-			bool isValid = computer.ValidateOSVersion();
-
-			// Assert
-			Assert.IsTrue(isValid);
 		}
 	}
 }

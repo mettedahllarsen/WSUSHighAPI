@@ -1,7 +1,5 @@
 ﻿namespace WSUSHighAPI.Models
-{
-	// Model class for the computer
-	public class Computer
+{	public class Computer
 	{
 		public int ComputerID { get; set; }
 		public string ComputerName { get; set; }
@@ -52,24 +50,6 @@
 			else if (!System.Net.IPAddress.TryParse(IPAddress, out _))
 			{
 				Console.WriteLine("IPAddress is not a valid IPv4 address.");
-				return false;
-			}
-			return true;
-		}
-
-		// Validation method to check if OSVersion is valid
-		public bool ValidateOSVersion()
-		{
-			// Check if OSVersion is empty or null
-			if (string.IsNullOrEmpty(OSVersion))
-			{
-				Console.WriteLine("OSVersion cannot be empty.");
-				return false;
-			}
-			// Check if the length of OSVersion exceeds the limit of 100 characters
-			else if (OSVersion.Length > 100)
-			{
-				Console.WriteLine("OSVersion cannot exceed 100 characters.");
 				return false;
 			}
 			return true;
