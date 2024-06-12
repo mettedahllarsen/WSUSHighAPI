@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using WSUSHighAPI;
 using WSUSHighAPI.Contexts;
 using WSUSHighAPI.Repositories;
 
@@ -27,8 +29,28 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Registering a singleton instance of ComputersRepository
-builder.Services.AddSingleton<ComputersRepository>(new ComputersRepository());
+// 
+bool useSQL = true;
+
+if (useSQL)
+{
+	var optionsBuilder = new DbContextOptionsBuilder<WSUSHighDbContext>();
+	optionsBuilder.UseSqlServer(Secrets.ConnectionString);
+	WSUSHighDbContext context = new WSUSHighDbContext(optionsBuilder.Options);
+	builder.Services.AddSingleton<ComputersRepository>(new ComputersRepository(context));
+
+}
+else
+{
+	// Registering a singleton instance of ComputersRepository for development prior to DBContext
+	//builder.Services.AddSingleton<ComputersRepository>(new ComputersRepository());
+}
+
+builder.Services.AddDbContext<WSUSHighDbContext>(options =>
+{
+	// Configure the connection string here
+	options.UseSqlServer("[YOUR_CONNECTION_STRING]");  // Replace with your actual connection string
+});
 
 var app = builder.Build();
 
