@@ -2,6 +2,6 @@
 {
 	public class Secrets
 	{
-		public static readonly string ConnectionString = "server=localhost;database=WSUSHighDB;" + "user id=sa;password=Mela14ad;TrustServerCertificate=True";
+		public static readonly string ConnectionString = "server=localhost;database=WSUSHighDB;" + "user id=sa;password=PASSWORD;TrustServerCertificate=True";
 	}
 }
