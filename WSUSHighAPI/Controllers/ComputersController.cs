@@ -105,14 +105,14 @@ namespace WSUSHighAPI.Controllers
 		public IActionResult DeleteComputer(int id)
 		{
 			Computer? computer = _computersRepository.GetComputerById(id);
-			if (computer != null)
+			if (computer == null)
 			{
-				_computersRepository.DeleteComputer(id);
-				return NoContent();
+				return NotFound();
 			}
 			else
 			{
-				return NotFound();
+				_computersRepository.DeleteComputer(id);
+				return Ok(); 
 			}
 		}
 

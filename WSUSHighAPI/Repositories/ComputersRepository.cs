@@ -31,7 +31,7 @@ namespace WSUSHighAPI.Repositories
 		}
 		public void UpdateComputer(int id, Computer updatedComputer)
 		{
-			var existingComputer = _context.Computers.Find(id);
+			Computer? existingComputer = _context.Computers.Find(id);
 			if (existingComputer != null)
 			{
 				// Validér navn og IP-adresse hvis de ikke er null
@@ -66,9 +66,17 @@ namespace WSUSHighAPI.Repositories
 		}
 
 		public void DeleteComputer(int id)
-		{			
-			_context.Computers.Remove(_context.Computers.Find(id));
-			_context.SaveChanges();
+		{
+			Computer? computer = _context.Computers.Find(id);
+			if (computer == null)
+			{
+				throw new InvalidOperationException("Computer not found");
+			}
+			else 
+			{
+				_context.Computers.Remove(computer);
+				_context.SaveChanges();
+			}
 		}
 	}
 }
