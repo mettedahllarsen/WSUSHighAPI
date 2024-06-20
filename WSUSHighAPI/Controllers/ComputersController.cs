@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using WSUSHighAPI.Models;
+﻿using WSUSHighAPI.Models;
 using WSUSHighAPI.Repositories;
 using WSUSHighAPI.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WSUSHighAPI.Controllers
 {
@@ -22,6 +22,7 @@ namespace WSUSHighAPI.Controllers
 		public ActionResult<IEnumerable<Computer>> Get()
 		{
 			List<Computer> computers = _computersRepository.GetAllComputers();
+			
 			if (computers.Any())
 			{
 				return Ok(computers);
@@ -38,6 +39,7 @@ namespace WSUSHighAPI.Controllers
 		public ActionResult<Computer> GetComputerById(int id)
 		{
 			Computer? computer = _computersRepository.GetComputerById(id);
+
 			if (computer != null)
 			{
 				return Ok(computer);
@@ -72,32 +74,28 @@ namespace WSUSHighAPI.Controllers
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public ActionResult<Computer> UpdateComputer(int id, [FromBody] Computer computer)
+		public ActionResult<Computer> UpdateComputer(int id, [FromBody] Computer updatedComputer)
 		{
-			if (id != computer.ComputerID)
+			Computer? existingComputer = _computersRepository.GetComputerById(id);
+			if (existingComputer != null)
 			{
-				return BadRequest("ID mismatch");
-			}
-
-			try
-			{
-				_computersRepository.UpdateComputer(computer);
-				if (computer != null)
+				try
 				{
-					return Ok(computer);
+					_computersRepository.UpdateComputer(id, updatedComputer);
+					return Ok(updatedComputer);
 				}
-				else
+				catch (ArgumentNullException ex)
 				{
-					return NotFound();
+					return BadRequest(ex.Message);
+				}
+				catch (ArgumentOutOfRangeException ex)
+				{
+					return BadRequest(ex.Message);
 				}
 			}
-			catch (ArgumentNullException ex)
+			else
 			{
-				return BadRequest(ex.Message);
-			}
-			catch (ArgumentOutOfRangeException ex)
-			{
-				return BadRequest(ex.Message);
+				return NotFound();
 			}
 		}
 
@@ -126,22 +124,24 @@ namespace WSUSHighAPI.Controllers
 		public async Task<ActionResult<string>> GetVersion(int id)
 		{
 			Computer? computer = _computersRepository.GetComputerById(id);
-			if (computer == null)
+			if (computer != null)
 			{
-				return NotFound("Computer not found"); 
-			}
+				string ipAddress = computer.IPAddress;
 
-			string ipAddress = computer.IPAddress;
-
-			try
-			{
-				TcpClientService tcpClient = new(5000); // Assuming the port remains constant
-				string version = await tcpClient.GetVersionAsync(ipAddress);
-				return Ok(version);
+				try
+				{
+					TcpClientService tcpClient = new(5000); // Assuming the port remains constant
+					string version = await tcpClient.GetVersionAsync(ipAddress);
+					return Ok(version);
+				}
+				catch (Exception ex)
+				{
+					return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+				}
 			}
-			catch (Exception ex)
+			else 
 			{
-				return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+				return NotFound("Computer not found");
 			}
 		}
 
@@ -152,29 +152,31 @@ namespace WSUSHighAPI.Controllers
 		public async Task<ActionResult> Update(int id)
 		{
 			Computer? computer = _computersRepository.GetComputerById(id);
-			if (computer == null)
+			if (computer != null)
+			{
+				string ipAddress = computer.IPAddress;
+
+				try
+				{
+					TcpClientService tcpClient = new(5000);
+					bool updateSuccess = await tcpClient.UpdateAsync(ipAddress);
+					if (updateSuccess)
+					{
+						return Ok("Update successful");
+					}
+					else
+					{
+						return StatusCode(StatusCodes.Status500InternalServerError, "Update failed");
+					}
+				}
+				catch (Exception ex)
+				{
+					return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+				}
+			}
+			else 
 			{
 				return NotFound("Computer not found");
-			}
-
-			string ipAddress = computer.IPAddress; 
-
-			try
-			{
-				TcpClientService tcpClient = new(5000);
-				bool updateSuccess = await tcpClient.UpdateAsync(ipAddress);
-				if (updateSuccess)
-				{
-					return Ok("Update successful");
-				}
-				else
-				{
-					return StatusCode(StatusCodes.Status500InternalServerError, "Update failed on server");
-				}
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
 			}
 		}
 	}

@@ -1,5 +1,4 @@
-﻿using System.Data.SqlClient;
-using WSUSHighAPI.Contexts;
+﻿using WSUSHighAPI.Contexts;
 using WSUSHighAPI.Models;
 
 namespace WSUSHighAPI.Repositories
@@ -30,23 +29,46 @@ namespace WSUSHighAPI.Repositories
 			_context.Computers.Add(computer);
 			_context.SaveChanges();
 		}
-
-		public void UpdateComputer(Computer computer)
+		public void UpdateComputer(int id, Computer updatedComputer)
 		{
-			computer.ValidateComputerName();
-			computer.ValidateIPAddress();
-			_context.Computers.Update(computer);
-			_context.SaveChanges();
+			var existingComputer = _context.Computers.Find(id);
+			if (existingComputer != null)
+			{
+				// Validér navn og IP-adresse hvis de ikke er null
+				if (!string.IsNullOrEmpty(updatedComputer.ComputerName))
+				{
+					updatedComputer.ValidateComputerName();
+					existingComputer.ComputerName = updatedComputer.ComputerName;
+				}
+
+				if (!string.IsNullOrEmpty(updatedComputer.IPAddress))
+				{
+					updatedComputer.ValidateIPAddress();
+					existingComputer.IPAddress = updatedComputer.IPAddress;
+				}
+
+				if (!string.IsNullOrEmpty(updatedComputer.OSVersion))
+				{
+					existingComputer.OSVersion = updatedComputer.OSVersion;
+				}
+
+				if (updatedComputer.LastConnection != null)
+				{
+					existingComputer.LastConnection = updatedComputer.LastConnection;
+				}
+
+				_context.SaveChanges();
+			}
+			else
+			{
+				throw new InvalidOperationException("Computer not found");
+			}
 		}
 
 		public void DeleteComputer(int id)
-		{
-			var computer = _context.Computers.Find(id);
-			if (computer != null)
-			{
-				_context.Computers.Remove(computer);
-				_context.SaveChanges();
-			}
+		{			
+			_context.Computers.Remove(_context.Computers.Find(id));
+			_context.SaveChanges();
 		}
 	}
 }
